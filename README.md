@@ -1,4 +1,4 @@
-# PersistenceWorkshop
+# Taller de Persistencia
 Este proyecto es una implementación en *Java* de un sistema de gestión de parqueadero,
 deonde s ehac euso de persistencia de datos
 
