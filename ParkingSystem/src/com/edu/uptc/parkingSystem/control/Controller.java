@@ -2,40 +2,31 @@ package com.edu.uptc.parkingSystem.control;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.edu.uptc.parkingSystem.model.RecordParking;
 import com.edu.uptc.parkingSystem.model.User;
 import com.edu.uptc.parkingSystem.model.Vehicle;
 import com.edu.uptc.parkingSystem.model.VehicleRate;
+import com.edu.uptc.parkingSystem.persistence.ParkingSystemPersistence;
 
 public class Controller {
-
-    private List<User> listUsers;
-    private List<Vehicle> listVehicles;
-    private List<RecordParking> listRecordParkings;
-    private List<VehicleRate> listVehicleRates;
-    private int limiteCupos = 20;
+    private ParkingSystemPersistence parkingSystemPersistence;
 
     public Controller() {
-        this.listUsers = new ArrayList<>();
-        this.listVehicles = new ArrayList<>();
-        this.listRecordParkings = new ArrayList<>();
-        this.listVehicleRates = new ArrayList<>();
+        parkingSystemPersistence = new ParkingSystemPersistence();
+        parkingSystemPersistence.loadFileTotal();
     }
     public void addVehicleRate() {
-        this.listVehicleRates.add(new VehicleRate("Carro", 1000));
-        this.listVehicleRates.add(new VehicleRate("Moto", 500));
-        this.listVehicleRates.add(new VehicleRate("Bicicleta", 200));
+        this.parkingSystemPersistence.getListVehicleRates().add(new VehicleRate("Carro", 1000));
+        this.parkingSystemPersistence.getListVehicleRates().add(new VehicleRate("Moto", 500));
+        this.parkingSystemPersistence.getListVehicleRates().add(new VehicleRate("Bicicleta", 200));
     }
     public void addUser(User user) {
         if (findUser(user) == null) {
-            this.listUsers.add(user);
+            this.parkingSystemPersistence.getListUsers().add(user);
         }
     }
     public User findUser(User user){
-        for (User u : listUsers) {
+        for (User u : parkingSystemPersistence.getListUsers()) {
             if (u.equals(user)) {
                 return u;
             }
@@ -44,13 +35,13 @@ public class Controller {
     }
     public Boolean addVehicle(Vehicle vehicle) {
         if (findVehicle(vehicle) == null) {
-            this.listVehicles.add(vehicle);
+            this.parkingSystemPersistence.getListVehicles().add(vehicle);
             return true;
         }
         return false;
     }
     public Vehicle findVehicle(Vehicle vehicle){
-        for (Vehicle v : listVehicles) {
+        for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
             if (v.equals(vehicle)) {
                 return v;
             }
@@ -59,14 +50,14 @@ public class Controller {
     }
     public void deleteVehicle(Vehicle vehicle) {
         if (findVehicle(vehicle) != null) {
-            this.listVehicles.remove(vehicle);
+            this.parkingSystemPersistence.getListVehicles().remove(vehicle);
         }
     }
 
     public Boolean updateVehicle(Vehicle oldVehicle, Vehicle newVehicle) {
-        for (int i = 0; i < listVehicles.size(); i++) {
-            if (listVehicles.get(i).equals(oldVehicle)) {
-                listVehicles.set(i, newVehicle);
+        for (int i = 0; i < this.parkingSystemPersistence.getListVehicles().size(); i++) {
+            if (this.parkingSystemPersistence.getListVehicles().get(i).equals(oldVehicle)) {
+                this.parkingSystemPersistence.getListVehicles().set(i, newVehicle);
                 return true;
             }
         }
@@ -75,16 +66,16 @@ public class Controller {
     }
     public String readVehicle(){
         StringBuilder sb = new StringBuilder();
-        for (Vehicle v : listVehicles) {
+        for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
             sb.append(v.toString()).append("\n");
         }
         return sb.toString();
     }
 
     public Boolean addRecordParking(RecordParking recordParking) {
-        if (listRecordParkings.size() < limiteCupos) {
+        if (this.parkingSystemPersistence.getListRecordParkings().size() < this.parkingSystemPersistence.getLimiteCupos()) {
             if (findRecordParking(recordParking) == null) {
-                this.listRecordParkings.add(recordParking);
+                this.parkingSystemPersistence.getListRecordParkings().add(recordParking);
                 return true;
             }
             return false;
@@ -94,7 +85,7 @@ public class Controller {
     }
 
     public RecordParking findRecordParking(RecordParking recordParking) {
-        for (RecordParking r : listRecordParkings) {
+        for (RecordParking r : this.parkingSystemPersistence.getListRecordParkings()) {
             if (r.equals(recordParking)) {
                 return r;
             }
@@ -103,13 +94,13 @@ public class Controller {
     }
     public void deleteRecordParking(RecordParking recordParking) {
         if (findRecordParking(recordParking) != null) {
-            this.listRecordParkings.remove(recordParking);
+            this.parkingSystemPersistence.getListRecordParkings().remove(recordParking);
         }
     }
     public Boolean updateRecordParking(RecordParking oldRecordParking, RecordParking newRecordParking) {
-        for (int i = 0; i < listRecordParkings.size(); i++) {
-            if (listRecordParkings.get(i).equals(oldRecordParking)) {
-                listRecordParkings.set(i, newRecordParking);
+        for (int i = 0; i < this.parkingSystemPersistence.getListRecordParkings().size(); i++) {
+            if (this.parkingSystemPersistence.getListRecordParkings().get(i).equals(oldRecordParking)) {
+            	this.parkingSystemPersistence.getListRecordParkings().set(i, newRecordParking);
                 return true;
             }
         }
@@ -118,53 +109,24 @@ public class Controller {
     }
     public String readRecordParking(){
         StringBuilder sb = new StringBuilder();
-        for (RecordParking r : listRecordParkings) {
+        for (RecordParking r : this.parkingSystemPersistence.getListRecordParkings()) {
             sb.append(r.toString()).append("\n");
         }
         return sb.toString();
     }
 
     public int findVehicleRatebyType (String type){
-        for (VehicleRate rate : listVehicleRates) {
+        for (VehicleRate rate : this.parkingSystemPersistence.getListVehicleRates()) {
             if (rate.getTypeVehicle().equalsIgnoreCase(type)) {
                 return rate.getPrice();
             }
         }
         return -1;
     }
-    public List<User> getListUsers() {
-        return listUsers;
-    }
-    public void setListUsers(List<User> listUsers) {
-        this.listUsers = listUsers;
-    }
-    public List<Vehicle> getListVehicles() {
-        return listVehicles;
-    }
-    public void setListVehicles(List<Vehicle> listVehicles) {
-        this.listVehicles = listVehicles;
-    }
-    public List<RecordParking> getListRecordParkings() {
-        return listRecordParkings;
-    }
-    public void setListRecordParkings(List<RecordParking> listRecordParkings) {
-        this.listRecordParkings = listRecordParkings;
-    }
-    public List<VehicleRate> getListVehicleRates() {
-        return listVehicleRates;
-    }
-    public void setListVehicleRates(List<VehicleRate> listVehicleRates) {
-        this.listVehicleRates = listVehicleRates;
-    }
-    public int getLimiteCupos() {
-        return limiteCupos;
-    }
-    public void setLimiteCupos(int limiteCupos) {
-        this.limiteCupos = limiteCupos;
-    }
+   
     public int calculateTotal(String placa, LocalDateTime departureTime) {
         RecordParking record = null;
-        for (RecordParking r : getListRecordParkings()) {
+        for (RecordParking r : this.parkingSystemPersistence.getListRecordParkings()) {
             if (r.getLicensePlate().equalsIgnoreCase(placa) && r.getEntryTime() != null) {
                 record = r;
                 break;
@@ -175,7 +137,7 @@ public class Controller {
         }
         long horas = Duration.between(record.getEntryTime(), departureTime).toHours();
         String tipoVehiculo = null;
-        for (Vehicle v : getListVehicles()) {
+        for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
             if (v.getLicensePlate().equalsIgnoreCase(placa)) {
                 tipoVehiculo = v.getTypeVehicle();
                 break;

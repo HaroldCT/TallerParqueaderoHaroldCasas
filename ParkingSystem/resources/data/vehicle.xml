@@ -1,0 +1,11 @@
+<XML version="1.0" encoding="UTF-8">
+<vehicle>
+
+	<licensePlate>bhp069</licensePlate>
+	<typeVehicle>Carro</typeVehicle>
+	<owner>null</owner>
+	<model>null</model>
+	<color>null</color>
+	<pricePerHour>0</pricePerHour>
+</vehicle>
+</XML>

@@ -17,7 +17,7 @@ public class Config {
 	
 	public Config() {
 		this.properties = new Properties();
-		try (FileInputStream entrada = new FileInputStream("resources/config/appConfig.properties/")){
+		try (FileInputStream entrada = new FileInputStream("resources/config/appConfig.properties")){
 			properties.load(entrada);
 			this.pathFile = properties.getProperty("app.config.path.files");
 			this.nameFileCSV = properties.getProperty("app.config.file.name.csv");
@@ -82,4 +82,3 @@ public class Config {
 	
 	
 }
-

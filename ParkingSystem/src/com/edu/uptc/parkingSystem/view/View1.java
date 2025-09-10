@@ -19,24 +19,16 @@ public class View1 {
 	Controller controller = new Controller();
 
     public void UserView() {
-        // Cargar la información desde el archivo serializado (SER) al iniciar
-        parkingSystemPersistence.loadFile(ETypeFileEnum.SER);
-        parkingSystemPersistence.loadFile(ETypeFileEnum.CSV);
-        parkingSystemPersistence.loadFile(ETypeFileEnum.XML);
-        parkingSystemPersistence.loadFile(ETypeFileEnum.JSON);
 
-        // Actualizar los ArrayList del controller principal con los datos cargados
-        this.controller.setListUsers(controller.getListUsers());
-        this.controller.setListVehicles(controller.getListVehicles());
-        this.controller.setListRecordParkings(controller.getListRecordParkings());
-        this.controller.setListVehicleRates(controller.getListVehicleRates());
+    	parkingSystemPersistence.loadFileTotal();
 
         this.controller.addVehicleRate();
         System.out.println("Bienvenido al servicio del parqueadero");
         String opcion = "";
-        Boolean salir = Boolean.FALSE;
-        Boolean salir1 = Boolean.FALSE;
-        Boolean salir2 = Boolean.FALSE;
+        boolean salir = false;
+        boolean salir1 = false;
+        boolean salir2 = false;
+        
         do {
             do {
                 System.out.println("Ya esta registrado? (S/N)");
@@ -46,8 +38,9 @@ public class View1 {
                     String username = sc.next();
                     System.out.println("Ingrese su contraseña:");
                     String password = sc.next();
+                    sc.nextLine(); 
                     boolean usuarioValido = false;
-                    for (User u : this.controller.getListUsers()) {
+                    for (User u : this.parkingSystemPersistence.getListUsers()) {
                         if (u.getUserName().equals(username) && u.getPassword().equals(password)) {
                             usuarioValido = true;
                             System.out.println("Bienvenido " + u.getUserName());
@@ -55,7 +48,7 @@ public class View1 {
                         }
                     }
                     if (usuarioValido) {
-                        salir = Boolean.TRUE;
+                        salir = true;
                     } else {
                         System.out.println("Nombre de usuario o contraseña incorrectos.");
                     }
@@ -64,14 +57,15 @@ public class View1 {
                     String newUsername = sc.next();
                     System.out.println("Ingrese su contraseña:");
                     String newPassword = sc.next();
+                    sc.nextLine(); 
                     User newUser = new User(newUsername, newPassword);
-                    if (!this.controller.getListUsers().contains(newUser)) {
-                        this.controller.getListUsers().add(newUser);
+                    if (!this.parkingSystemPersistence.getListUsers().contains(newUser)) {
+                        this.parkingSystemPersistence.getListUsers().add(newUser);
                         
                         parkingSystemPersistence.dumpFile(ETypeFileEnum.SER);
 
                         System.out.println("Usuario registrado exitosamente.");
-                        salir = Boolean.TRUE;
+                        salir = true;
                     } else {
                         System.out.println("El nombre de usuario ya está en uso.");
                     }
@@ -112,18 +106,18 @@ public class View1 {
                         } else if (tipo == 2) {
                             tipoVehiculo = "Moto";
                         } else if (tipo == 3) {
-                            tipoVehiculo = "Bicicleta";
+                            tipoVehiculo = "Camión";
                         }else {
                             System.out.println("Tipo de vehículo no válido.");
                         }
                     } while (tipo < 1 || tipo > 3);
 
                     Vehicle vehicle = new Vehicle(placa, tipoVehiculo);
-                    this.controller.getListVehicles().add(vehicle);
+                    this.parkingSystemPersistence.getListVehicles().add(vehicle);
 
                     LocalDateTime entrada = LocalDateTime.now();
                     RecordParking record = new RecordParking(placa, entrada);
-                    this.controller.getListRecordParkings().add(record);
+                    this.parkingSystemPersistence.getListRecordParkings().add(record);
 
                     this.parkingSystemPersistence.dumpFile(ETypeFileEnum.JSON);
 
@@ -135,7 +129,7 @@ public class View1 {
                     System.out.print("Ingrese la placa del vehículo a sacar: ");
                     String placa = sc.nextLine();
                     boolean encontrado = false;
-                    for (RecordParking record : this.controller.getListRecordParkings()) {
+                    for (RecordParking record : this.parkingSystemPersistence.getListRecordParkings()) {
                         if (record.getLicensePlate().equalsIgnoreCase(placa) && record.getDepartureTime() == null && record.getTotal() == 0) {
                             LocalDateTime departureTime = LocalDateTime.now();
                             record.setDepartureTime(departureTime);
@@ -143,7 +137,7 @@ public class View1 {
 
                             this.parkingSystemPersistence.dumpFile(ETypeFileEnum.JSON);
 
-                            System.out.println("Vehículo " + placa + " ha salido del parqueadero.");
+                            System.out.println("Vehículo " + placa + " ha salido del parqueadero correctamente. Total a pagar: " + record.getTotal() + " pesos.");
                             encontrado = true;
                             break;
                         }
@@ -171,8 +165,8 @@ public class View1 {
 					int totalVehiculos = 0;
 					int totalGanancias = 0;
 
-                    for (RecordParking record : this.controller.getListRecordParkings()) {
-                        if (record.getEntryTime().toLocalDate().equals(fechaBuscada)) {
+                    for (RecordParking record : this.parkingSystemPersistence.getListRecordParkings()) {
+                        if (record.getEntryTimeAsLocalDateTime() != null && record.getEntryTimeAsLocalDateTime().toLocalDate().equals(fechaBuscada)) {
                             totalVehiculos++;
                             totalGanancias += record.getTotal();
                         }
@@ -201,7 +195,7 @@ public class View1 {
     } 
 
     public void vehicleCRUD() {
-        Boolean salir = Boolean.FALSE;
+        boolean salir = false;
         do {
             System.out.println("""
                 Menú de CRUD de vehículos:
@@ -234,7 +228,7 @@ public class View1 {
                         } else if (tipo == 2) {
                             tipoVehiculo = "Moto";
                         } else if (tipo == 3) {
-                            tipoVehiculo = "Bicicleta";
+                            tipoVehiculo = "Camión";
                         }else {
                             System.out.println("Tipo de vehículo no válido.");
                         }
@@ -246,10 +240,10 @@ public class View1 {
                     System.out.println("Ingrese el color del vehículo: ");
                     String color = sc.nextLine();
                     Vehicle vehicle = new Vehicle(placa, tipoVehiculo, owner, model, color, this.controller.findVehicleRatebyType(tipoVehiculo));
-                    if (this.controller.getListVehicles().contains(vehicle)) {
+                    if (this.parkingSystemPersistence.getListVehicles().contains(vehicle)) {
                         System.out.println("El vehículo ya existe.");
                     } else {
-                        this.controller.getListVehicles().add(vehicle);
+                        this.parkingSystemPersistence.getListVehicles().add(vehicle);
 
                         this.parkingSystemPersistence.dumpFile(ETypeFileEnum.XML);
 
@@ -259,7 +253,7 @@ public class View1 {
                 }
                 case 2: {
                     System.out.println("Lista de vehículos:");
-                    for (Vehicle v : this.controller.getListVehicles()) {
+                    for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
                         System.out.println(v);
                     }
                     break;
@@ -268,7 +262,7 @@ public class View1 {
                     System.out.print("Ingrese la placa del vehículo a actualizar: ");
                     String placa = sc.nextLine();
                     Vehicle vehicleToUpdate = null;
-                    for (Vehicle v : this.controller.getListVehicles()) {
+                    for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
                         if (v.getLicensePlate().equalsIgnoreCase(placa)) {
                             vehicleToUpdate = v;
                             break;
@@ -293,7 +287,7 @@ public class View1 {
                             } else if (newTipo == 2) {
                                 newTipoVehiculo = "Moto";
                             } else if (newTipo == 3) {
-                                newTipoVehiculo = "Bicicleta";
+                                newTipoVehiculo = "Camión";
                             } else {
                                 System.out.println("Tipo de vehículo no válido.");
                             }
@@ -314,14 +308,14 @@ public class View1 {
                     System.out.print("Ingrese la placa del vehículo a eliminar: ");
                     String placa = sc.nextLine();
                     Vehicle vehicleToRemove = null;
-                    for (Vehicle v : this.controller.getListVehicles()) {
+                    for (Vehicle v : this.parkingSystemPersistence.getListVehicles()) {
                         if (v.getLicensePlate().equalsIgnoreCase(placa)) {
                             vehicleToRemove = v;
                             break;
                         }
                     }
                     if (vehicleToRemove != null) {
-                        this.controller.getListVehicles().remove(vehicleToRemove);
+                        this.parkingSystemPersistence.getListVehicles().remove(vehicleToRemove);
 
                         this.parkingSystemPersistence.dumpFile(ETypeFileEnum.XML);
 
